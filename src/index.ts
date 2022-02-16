@@ -1,20 +1,10 @@
 const Fastify = require('fastify');
 const mercurius = require('mercurius');
 const { PrismaClient } = require('@prisma/client');
+import schema from '../graphql/schema';
 
 const app = Fastify();
 const prisma = new PrismaClient();
-
-const schema = `
-type User {
-  firstName: String
-  lastName: String
-}
-
-type Query {
-  users: [User]
-}
-`;
 
 const resolvers = {
 	Query: {

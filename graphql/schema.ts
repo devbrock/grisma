@@ -24,6 +24,12 @@ type Post = {
 	userId: string;
 };
 
+declare module '@mgcrea/fastify-session' {
+	interface Session {
+		userId: any;
+	}
+}
+
 const nameValidation = createZodSchema({ minLength: 1, maxLength: 5 });
 
 const builder = new SchemaBuilder<{
@@ -99,17 +105,14 @@ builder.queryType({
 		me: t.field({
 			type: 'User',
 			nullable: true,
-			// resolve: async (parent, args, ctx) => {
-			// 	console.log(ctx.req.session.userId);
-			// 	if (!ctx.req.session.userId) {
-			// 		return null;
-			// 	}
-			// 	return await prisma.user.findUnique({
-			// 		where: { id: ctx.req.session.userId },
-			// 	});
-			// },
-			resolve: () => {
-				return null;
+			resolve: async (parent, args, ctx) => {
+				console.log(ctx.req.session.userId);
+				if (!ctx.req.session.userId) {
+					return null;
+				}
+				return await prisma.user.findUnique({
+					where: { id: ctx.req.session.userId },
+				});
 			},
 		}),
 	}),
@@ -181,7 +184,7 @@ builder.mutationType({
 					return null;
 				}
 
-				// ctx.req.session.userId = user.id;
+				ctx.req.session.userId = user.id;
 				// console.log(ctx);
 				// console.log('set userid to', ctx.req.session.userId);
 				return user;

@@ -1,5 +1,4 @@
 import SchemaBuilder from '@pothos/core';
-import { userInfo } from 'os';
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -63,13 +62,11 @@ builder.queryType({
 		// USER QUERY
 		user: t.field({
 			type: 'User',
-			resolve: () => ({
-				id: '1',
-				first_name: 'Jane',
-				last_name: 'Doe',
-				email: 'test',
-				posts: [],
-			}),
+			args: {
+				id: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.findUnique({ where: { id: args.id } }),
 		}),
 		// USERS QUERY
 		users: t.field({
@@ -80,6 +77,108 @@ builder.queryType({
 		posts: t.field({
 			type: ['Post'],
 			resolve: async () => await prisma.post.findMany(),
+		}),
+	}),
+});
+
+builder.mutationType({
+	fields: (t) => ({
+		// CREATE USER MUTATION
+		createUser: t.field({
+			type: 'User',
+			args: {
+				firstName: t.arg.string(),
+				lastName: t.arg.string(),
+				email: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.create({
+					data: {
+						first_name: args.firstName,
+						last_name: args.lastName,
+						email: args.email,
+					},
+				}),
+		}),
+		// DELETE USER MUTATION
+		deleteUser: t.field({
+			type: 'User',
+			args: {
+				id: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.delete({
+					where: {
+						id: args.id,
+					},
+				}),
+		}),
+
+		// UPDATE USER MUTATION
+		updateUser: t.field({
+			type: 'User',
+			args: {
+				id: t.arg.string(),
+				firstName: t.arg.string(),
+				lastName: t.arg.string(),
+				email: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.update({
+					where: { id: args.id },
+					data: {
+						first_name: args.firstName,
+						last_name: args.lastName,
+						email: args.email,
+					},
+				}),
+		}),
+
+		// CREATE POST MUTATION
+		createPost: t.field({
+			type: 'Post',
+			args: {
+				title: t.arg.string(),
+				content: t.arg.string(),
+				userId: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.post.create({
+					data: {
+						title: args.title,
+						content: args.content,
+						userId: args.userId,
+					},
+				}),
+		}),
+		// DELETE POST MUTATION
+		deletePost: t.field({
+			type: 'Post',
+			args: {
+				id: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.post.delete({ where: { id: args.id } }),
+		}),
+
+		// UPDATE POST MUTATION
+		updatePost: t.field({
+			type: 'Post',
+			args: {
+				id: t.arg.string(),
+				title: t.arg.string(),
+				content: t.arg.string(),
+				userId: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.post.update({
+					where: { id: args.id },
+					data: {
+						title: args.title,
+						content: args.content,
+						userId: args.userId,
+					},
+				}),
 		}),
 	}),
 });

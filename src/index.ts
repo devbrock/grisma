@@ -9,9 +9,9 @@ const prisma = new PrismaClient();
 
 app.register(mercurius, {
 	schema,
-	context: (request: unknown, reply: unknown) => {
-		return { prisma };
-	},
+	// context: (request: unknown, reply: unknown) => {
+	// 	return { prisma };
+	// },
 });
 
 app.register(Altair);

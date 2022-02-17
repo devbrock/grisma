@@ -5,13 +5,9 @@ const { PrismaClient } = require('@prisma/client');
 const Altair = require('altair-fastify-plugin');
 
 const app = Fastify();
-const prisma = new PrismaClient();
 
 app.register(mercurius, {
 	schema,
-	// context: (request: unknown, reply: unknown) => {
-	// 	return { prisma };
-	// },
 });
 
 app.register(Altair);

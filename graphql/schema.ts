@@ -100,6 +100,23 @@ builder.mutationType({
 					},
 				}),
 		}),
+		// CREATE POST MUTATION
+		createPost: t.field({
+			type: 'Post',
+			args: {
+				title: t.arg.string(),
+				content: t.arg.string(),
+				userId: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.post.create({
+					data: {
+						title: args.title,
+						content: args.content,
+						userId: args.userId,
+					},
+				}),
+		}),
 	}),
 });
 

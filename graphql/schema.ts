@@ -100,6 +100,19 @@ builder.mutationType({
 					},
 				}),
 		}),
+		// DELETE USER MUTATION
+		deleteUser: t.field({
+			type: 'User',
+			args: {
+				id: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.delete({
+					where: {
+						id: args.id,
+					},
+				}),
+		}),
 		// CREATE POST MUTATION
 		createPost: t.field({
 			type: 'Post',
@@ -116,6 +129,15 @@ builder.mutationType({
 						userId: args.userId,
 					},
 				}),
+		}),
+		// DELETE POST MUTATION
+		deletePost: t.field({
+			type: 'Post',
+			args: {
+				id: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.post.delete({ where: { id: args.id } }),
 		}),
 	}),
 });

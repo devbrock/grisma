@@ -1,5 +1,6 @@
 import SchemaBuilder from '@pothos/core';
 const { PrismaClient } = require('@prisma/client');
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -7,7 +8,9 @@ type User = {
 	id: string;
 	first_name: string;
 	last_name: string;
+	name: string;
 	email: string;
+	password: string;
 	posts: Post[];
 };
 
@@ -26,7 +29,12 @@ builder.objectType('User', {
 		id: t.exposeID('id', {}),
 		firstName: t.exposeString('first_name', {}),
 		lastName: t.exposeString('last_name', {}),
+		name: t.field({
+			type: 'String',
+			resolve: (parent) => `${parent.first_name} ${parent.last_name}`,
+		}),
 		email: t.exposeString('email', {}),
+		password: t.exposeString('password', {}),
 		posts: t.field({
 			type: ['Post'],
 			resolve: async (parent) => {
@@ -90,15 +98,20 @@ builder.mutationType({
 				firstName: t.arg.string(),
 				lastName: t.arg.string(),
 				email: t.arg.string(),
+				password: t.arg.string(),
 			},
-			resolve: async (parent, args) =>
-				await prisma.user.create({
+			resolve: async (parent, args) => {
+				const hashedPassword = await bcrypt.hash(args.password!, 12);
+				const user = await prisma.user.create({
 					data: {
 						first_name: args.firstName,
 						last_name: args.lastName,
 						email: args.email,
+						password: hashedPassword,
 					},
-				}),
+				});
+				return user;
+			},
 		}),
 		// DELETE USER MUTATION
 		deleteUser: t.field({

@@ -113,6 +113,27 @@ builder.mutationType({
 					},
 				}),
 		}),
+
+		// UPDATE USER MUTATION
+		updateUser: t.field({
+			type: 'User',
+			args: {
+				id: t.arg.string(),
+				firstName: t.arg.string(),
+				lastName: t.arg.string(),
+				email: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.update({
+					where: { id: args.id },
+					data: {
+						first_name: args.firstName,
+						last_name: args.lastName,
+						email: args.email,
+					},
+				}),
+		}),
+
 		// CREATE POST MUTATION
 		createPost: t.field({
 			type: 'Post',
@@ -138,6 +159,26 @@ builder.mutationType({
 			},
 			resolve: async (parent, args) =>
 				await prisma.post.delete({ where: { id: args.id } }),
+		}),
+
+		// UPDATE POST MUTATION
+		updatePost: t.field({
+			type: 'Post',
+			args: {
+				id: t.arg.string(),
+				title: t.arg.string(),
+				content: t.arg.string(),
+				userId: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.post.update({
+					where: { id: args.id },
+					data: {
+						title: args.title,
+						content: args.content,
+						userId: args.userId,
+					},
+				}),
 		}),
 	}),
 });

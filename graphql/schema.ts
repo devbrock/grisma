@@ -1,5 +1,4 @@
 import SchemaBuilder from '@pothos/core';
-import { userInfo } from 'os';
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -63,13 +62,11 @@ builder.queryType({
 		// USER QUERY
 		user: t.field({
 			type: 'User',
-			resolve: () => ({
-				id: '1',
-				first_name: 'Jane',
-				last_name: 'Doe',
-				email: 'test',
-				posts: [],
-			}),
+			args: {
+				id: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.findUnique({ where: { id: args.id } }),
 		}),
 		// USERS QUERY
 		users: t.field({
@@ -80,6 +77,28 @@ builder.queryType({
 		posts: t.field({
 			type: ['Post'],
 			resolve: async () => await prisma.post.findMany(),
+		}),
+	}),
+});
+
+builder.mutationType({
+	fields: (t) => ({
+		// CREATE USER MUTATION
+		createUser: t.field({
+			type: 'User',
+			args: {
+				firstName: t.arg.string(),
+				lastName: t.arg.string(),
+				email: t.arg.string(),
+			},
+			resolve: async (parent, args) =>
+				await prisma.user.create({
+					data: {
+						first_name: args.firstName,
+						last_name: args.lastName,
+						email: args.email,
+					},
+				}),
 		}),
 	}),
 });

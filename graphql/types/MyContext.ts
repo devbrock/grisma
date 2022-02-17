@@ -1,6 +1,5 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { Request } from 'express';
 
 export interface MyContext {
-	req: FastifyRequest;
-	rep: FastifyReply;
+	req: Request;
 }

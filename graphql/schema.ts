@@ -1,6 +1,7 @@
 import SchemaBuilder from '@pothos/core';
+import ValidationPlugin, { createZodSchema } from '@pothos/plugin-validation';
 const { PrismaClient } = require('@prisma/client');
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +23,11 @@ type Post = {
 	userId: string;
 };
 
-const builder = new SchemaBuilder<{ Objects: { User: User; Post: Post } }>({});
+const nameValidation = createZodSchema({ minLength: 1, maxLength: 5 });
+
+const builder = new SchemaBuilder<{ Objects: { User: User; Post: Post } }>({
+	plugins: [ValidationPlugin],
+});
 
 builder.objectType('User', {
 	fields: (t) => ({
@@ -95,9 +100,21 @@ builder.mutationType({
 		createUser: t.field({
 			type: 'User',
 			args: {
-				firstName: t.arg.string(),
-				lastName: t.arg.string(),
-				email: t.arg.string(),
+				firstName: t.arg.string({
+					validate: {
+						schema: nameValidation,
+					},
+				}),
+				lastName: t.arg.string({
+					validate: {
+						schema: nameValidation,
+					},
+				}),
+				email: t.arg.string({
+					validate: {
+						email: [true, { message: 'invalid email address' }],
+					},
+				}),
 				password: t.arg.string(),
 			},
 			resolve: async (parent, args) => {
@@ -132,9 +149,21 @@ builder.mutationType({
 			type: 'User',
 			args: {
 				id: t.arg.string(),
-				firstName: t.arg.string(),
-				lastName: t.arg.string(),
-				email: t.arg.string(),
+				firstName: t.arg.string({
+					validate: {
+						schema: nameValidation,
+					},
+				}),
+				lastName: t.arg.string({
+					validate: {
+						schema: nameValidation,
+					},
+				}),
+				email: t.arg.string({
+					validate: {
+						email: [true, { message: 'invalid email address' }],
+					},
+				}),
 			},
 			resolve: async (parent, args) =>
 				await prisma.user.update({

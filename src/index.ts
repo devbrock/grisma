@@ -1,17 +1,14 @@
 import { schema } from './../graphql/schema';
-const Fastify = require('fastify');
-const mercurius = require('mercurius');
-const { PrismaClient } = require('@prisma/client');
-const Altair = require('altair-fastify-plugin');
+import Fastify from 'fastify';
+import mercurius from 'mercurius';
 
 const app = Fastify();
 
 app.register(mercurius, {
 	schema,
+	graphiql: true,
 });
-
-app.register(Altair);
 
 app
 	.listen(4000)
-	.then(() => console.log(`🚀 Server ready at http://localhost:4000/altair`));
+	.then(() => console.log(`🚀 Server ready at http://localhost:4000/graphiql`));

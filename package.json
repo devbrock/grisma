@@ -19,6 +19,7 @@
 	"dependencies": {
 		"@pothos/core": "^3.3.1",
 		"@prisma/client": "^3.9.2",
+		"altair-fastify-plugin": "^4.4.0",
 		"fastify": "^3.27.1",
 		"graphql": "^16.3.0",
 		"mercurius": "^9.3.2"

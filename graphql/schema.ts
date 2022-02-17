@@ -2,6 +2,7 @@ import SchemaBuilder from '@pothos/core';
 import ValidationPlugin, { createZodSchema } from '@pothos/plugin-validation';
 const { PrismaClient } = require('@prisma/client');
 import bcrypt from 'bcryptjs';
+import { MyContext } from './types/MyContext';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +26,10 @@ type Post = {
 
 const nameValidation = createZodSchema({ minLength: 1, maxLength: 5 });
 
-const builder = new SchemaBuilder<{ Objects: { User: User; Post: Post } }>({
+const builder = new SchemaBuilder<{
+	Objects: { User: User; Post: Post };
+	Context: MyContext;
+}>({
 	plugins: [ValidationPlugin],
 });
 
@@ -91,12 +95,29 @@ builder.queryType({
 			type: ['Post'],
 			resolve: async () => await prisma.post.findMany(),
 		}),
+		// ME QUERY
+		me: t.field({
+			type: 'User',
+			nullable: true,
+			// resolve: async (parent, args, ctx) => {
+			// 	console.log(ctx.req.session.userId);
+			// 	if (!ctx.req.session.userId) {
+			// 		return null;
+			// 	}
+			// 	return await prisma.user.findUnique({
+			// 		where: { id: ctx.req.session.userId },
+			// 	});
+			// },
+			resolve: () => {
+				return null;
+			},
+		}),
 	}),
 });
 
 builder.mutationType({
 	fields: (t) => ({
-		// CREATE USER MUTATION
+		// CREATE USER MUTATION aka Register
 		createUser: t.field({
 			type: 'User',
 			args: {
@@ -130,6 +151,43 @@ builder.mutationType({
 				return user;
 			},
 		}),
+
+		// LOGIN MUTATION
+		login: t.field({
+			type: 'User',
+			nullable: true,
+			args: {
+				email: t.arg.string({
+					validate: {
+						email: [true, { message: 'not a valid email' }],
+					},
+				}),
+				password: t.arg.string({}),
+			},
+			resolve: async (parent, args, ctx) => {
+				const user = await prisma.user.findUnique({
+					where: {
+						email: args.email,
+					},
+				});
+
+				if (!user) {
+					return null;
+				}
+
+				const isMatch = await bcrypt.compare(args.password!, user.password);
+
+				if (!isMatch) {
+					return null;
+				}
+
+				// ctx.req.session.userId = user.id;
+				// console.log(ctx);
+				// console.log('set userid to', ctx.req.session.userId);
+				return user;
+			},
+		}),
+
 		// DELETE USER MUTATION
 		deleteUser: t.field({
 			type: 'User',

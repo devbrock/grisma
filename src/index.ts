@@ -1,42 +1,54 @@
+import cors from 'cors';
 import { schema } from './../graphql/schema';
-import Fastify from 'fastify';
-import fastifyCookie from 'fastify-cookie';
-import fastifySession from '@mgcrea/fastify-session';
-import mercurius from 'mercurius';
-import RedisStore from '@mgcrea/fastify-session-redis-store';
-import cors from 'fastify-cors';
 import { redis } from './redis';
+import { ApolloServer } from 'apollo-server-express';
+const express = require('express');
+import connectRedis from 'connect-redis';
+import session from 'express-session';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from '.pnpm/apollo-server-core@3.6.3_graphql@16.3.0/node_modules/apollo-server-core';
 
-const app = Fastify();
+const main = async () => {
+	const server = new ApolloServer({
+		schema,
+		context: ({ req }: any) => ({ req }),
+		plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
+	});
 
-app.register(mercurius, {
-	schema,
-	path: '/graphql',
-	graphiql: true,
-	context: (req, rep) => ({
-		req,
-		rep,
-	}),
-});
+	const app = express();
 
-app.register(cors, {
-	credentials: true,
-	origin: 'http://localhost:3000',
-});
+	const RedisStore = connectRedis(session);
 
-app.register(fastifyCookie);
-app.register(fastifySession, {
-	store: new RedisStore({ client: redis }),
-	secret: 'a secret with minimum length of 32 characters',
-	saveUninitialized: true,
-	cookieName: 'gsid',
-	cookie: {
-		httpOnly: true,
-		secure: false, // change to true for production
-		maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
-	},
-});
+	app.use(
+		cors({
+			credentials: true,
+			origin: 'http://localhost:3000',
+		})
+	);
 
-app
-	.listen(4000)
-	.then(() => console.log(`🚀 Server ready at http://localhost:4000/graphiql`));
+	app.use(
+		session({
+			store: new RedisStore({
+				client: redis as any,
+			}),
+			name: 'gsid',
+			secret: 'aslkdfjoiq12312',
+			resave: false,
+			saveUninitialized: false,
+			cookie: {
+				httpOnly: true,
+				secure: false, //process.env.NODE_ENV === "production",
+				maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
+			},
+		})
+	);
+
+	await server.start();
+
+	server.applyMiddleware({ app });
+
+	app.listen(4000, () => {
+		console.log('server started on http://localhost:4000/graphql');
+	});
+};
+
+main();

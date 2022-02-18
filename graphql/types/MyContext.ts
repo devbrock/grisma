@@ -1,3 +1,4 @@
+import { FastifyRequest } from 'fastify';
 export interface MyContext {
-	req: any;
+	req: FastifyRequest;
 }

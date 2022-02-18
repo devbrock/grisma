@@ -24,6 +24,12 @@ type Post = {
 	userId: string;
 };
 
+declare module '@mgcrea/fastify-session-redis-store' {
+	interface SessionData {
+		userId: any;
+	}
+}
+
 const nameValidation = createZodSchema({ minLength: 1, maxLength: 5 });
 
 const builder = new SchemaBuilder<{

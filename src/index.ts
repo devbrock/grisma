@@ -13,10 +13,7 @@ app.register(mercurius, {
 	schema,
 	path: '/graphql',
 	graphiql: true,
-	context: (req, rep) => ({
-		req,
-		rep,
-	}),
+	context: ({ req }: any) => req,
 });
 
 app.register(cors, {
@@ -25,6 +22,7 @@ app.register(cors, {
 });
 
 app.register(fastifyCookie);
+
 app.register(fastifySession, {
 	store: new RedisStore({ client: redis }),
 	secret: 'a secret with minimum length of 32 characters',

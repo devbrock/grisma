@@ -24,12 +24,6 @@ type Post = {
 	userId: string;
 };
 
-declare module '@mgcrea/fastify-session' {
-	interface Session {
-		userId: any;
-	}
-}
-
 const nameValidation = createZodSchema({ minLength: 1, maxLength: 5 });
 
 const builder = new SchemaBuilder<{
@@ -185,8 +179,6 @@ builder.mutationType({
 				}
 
 				ctx.req.session.userId = user.id;
-				// console.log(ctx);
-				// console.log('set userid to', ctx.req.session.userId);
 				return user;
 			},
 		}),

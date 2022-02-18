@@ -1,3 +1,4 @@
+import { JsonObject, typeJsonObject } from 'type-fest';
 import SchemaBuilder from '@pothos/core';
 import ValidationPlugin, { createZodSchema } from '@pothos/plugin-validation';
 const { PrismaClient } = require('@prisma/client');
@@ -23,12 +24,6 @@ type Post = {
 	author: User;
 	userId: string;
 };
-
-declare module '@mgcrea/fastify-session-redis-store' {
-	interface SessionData {
-		userId: any;
-	}
-}
 
 const nameValidation = createZodSchema({ minLength: 1, maxLength: 5 });
 

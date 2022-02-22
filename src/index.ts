@@ -2,7 +2,7 @@ import cors from 'cors';
 import { schema } from './../graphql/schema';
 import { redis } from './redis';
 import { ApolloServer } from 'apollo-server-express';
-const express = require('express');
+import express from 'express';
 import connectRedis from 'connect-redis';
 import session from 'express-session';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from '.pnpm/apollo-server-core@3.6.3_graphql@16.3.0/node_modules/apollo-server-core';
@@ -10,7 +10,7 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from '.pnpm/apollo-ser
 const main = async () => {
 	const server = new ApolloServer({
 		schema,
-		context: ({ req }: any) => ({ req }),
+		context: ({ req, res }: any) => ({ req, res }),
 		plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
 	});
 

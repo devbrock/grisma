@@ -188,6 +188,20 @@ builder.mutationType({
 			},
 		}),
 
+		// LOGOUT MUTATION
+		logout: t.field({
+			type: 'Boolean',
+			nullable: true,
+			resolve: async (parent, args, ctx) => {
+				ctx.req.session.destroy((err) => {
+					console.error(`ERROR: ${err} No session found. Unable to logout.`);
+					return false;
+				});
+				ctx.res.clearCookie('gsid');
+				return true;
+			},
+		}),
+
 		// DELETE USER MUTATION
 		deleteUser: t.field({
 			type: 'User',
